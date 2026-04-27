@@ -55,6 +55,10 @@ co-batch --parallel 4 --model claude-sonnet-4-6 --min-score 3.0
 ~/career-ops/hooks/post-batch.sh   # ad-hoc rsync + push
 ```
 
+## Day-to-day usage
+
+See [`docs/USAGE.md`](docs/USAGE.md) for the full guide: workflows, slash command reference, routine maintenance, troubleshooting.
+
 ## Companion projects
 
 | Repo | Role |
