@@ -9,8 +9,9 @@ These are intentionally kept out of the main career-ops fork so the OSS upstream
 | Script | Purpose |
 |--------|---------|
 | `scripts/process-url.sh` | One-shot CLI wrapper. Runs `claude -p` with the career-ops batch prompt for a single URL: A–G eval → report → PDF → tracker → push to dashboard. Symlinked into `~/bin/co-process`. |
-| `scripts/post-batch.sh` | rsync `data/` and `reports/` into `~/career-ops-data` and `git push`. The in-cluster dashboard's `git-sync` sidecar pulls the change within ~30 s. Hooked from career-ops `batch/batch-runner.sh::merge_tracker`. |
-| `scripts/install.sh` | Symlinks both scripts into `~/career-ops/{scripts,hooks}` and `~/bin`. Idempotent — re-run after `git pull`. |
+| `scripts/co-batch.sh` | Wrapper around `career-ops/batch/batch-runner.sh` that runs the post-batch sync after the batch completes. Forwards every flag through. Symlinked into `~/bin/co-batch`. |
+| `scripts/post-batch.sh` | rsync `data/` and `reports/` into `~/career-ops-data` and `git push`. The in-cluster dashboard's `git-sync` sidecar pulls the change within ~30 s. Invoked by `co-batch` and `co-process`. |
+| `scripts/install.sh` | Symlinks scripts into `~/career-ops/{scripts,hooks}` and `~/bin`. Idempotent — re-run after `git pull`. |
 
 ## Install
 
@@ -33,7 +34,20 @@ Default model is `claude-sonnet-4-6`. Override with `--model claude-opus-4-7` or
 
 ### Batch processing
 
-`career-ops/batch/batch-runner.sh` calls `hooks/post-batch.sh` automatically at the end of `merge_tracker`. Nothing extra to do.
+```bash
+co-batch --parallel 4 --min-score 3.0
+co-batch --retry-failed
+co-batch --dry-run                  # no run, no sync
+co-batch --no-sync ...              # run batch but skip the dashboard sync
+```
+
+The wrapper forwards every flag to `batch-runner.sh`. After it finishes, it invokes `post-batch.sh` so the dashboard sees the new state. This avoids modifying the OSS `batch-runner.sh` directly — auto-updates can't clobber the integration.
+
+Combine with the upstream-pending `--model` flag ([santifer/career-ops#504](https://github.com/santifer/career-ops/pull/504)) for cheap large batches:
+
+```bash
+co-batch --parallel 4 --model claude-sonnet-4-6 --min-score 3.0
+```
 
 ### Manual sync
 

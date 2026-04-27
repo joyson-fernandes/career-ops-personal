@@ -34,6 +34,7 @@ echo "Installing from $REPO_DIR"
 link "$REPO_DIR/scripts/process-url.sh" "$CAREER_OPS_DIR/scripts/process-url.sh"
 link "$REPO_DIR/scripts/post-batch.sh"  "$CAREER_OPS_DIR/hooks/post-batch.sh"
 link "$REPO_DIR/scripts/process-url.sh" "$BIN_DIR/co-process"
+link "$REPO_DIR/scripts/co-batch.sh"    "$BIN_DIR/co-batch"
 
 echo
-echo "Done. Try: co-process --help"
+echo "Done. Try: co-process --help, co-batch --help"
